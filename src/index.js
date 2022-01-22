@@ -59,9 +59,9 @@ const main = async () => {
 
     await page.click('#share-button');
     const squares = await page.evaluate(() => navigator.clipboard.readText());
-    console.log(`Answer: ${answer}\n\n${squares}`);
-
     await browser.close();
+    
+    console.log(`Answer: "${answer.toUpperCase()}"\n\n${squares}`);
 };
 
 main();
