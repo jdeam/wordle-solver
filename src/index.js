@@ -1,23 +1,20 @@
-const playwright = require('playwright');
 const { getNextGuess } = require('./wordUtils');
-
-const WORDLE_URL = 'https://www.powerlanguage.co.uk/wordle/';
+const { 
+    startGame, 
+    enterGuess, 
+    getResults,
+    copySquares,
+} = require('./pageUtils');
 
 const main = async () => {
-    const browser = await playwright.chromium.launch({ headless: false });
-    const context = await browser.newContext();
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    const { page, browser } = await startGame();
 
-    const page = await context.newPage();
-    await page.goto(WORDLE_URL);
-    await page.click('.close-icon');
-
+    const guesses = new Set();
     const hits = new Set();
+    
     const toExclude = []
     const toIncludeNotAt = [];
     const toIncludeAt = [];
-
-    let answer = '';
 
     for (let i = 0; i < 6; i++) {
         const guess = getNextGuess({
@@ -27,20 +24,11 @@ const main = async () => {
             toIncludeAt,
         });
 
-        await page.type('#game', guess);
-        await page.keyboard.press('Enter');
-        await page.waitForTimeout(2000);
-
-        const rows = await page.$$('game-row');
-        const tiles = await rows[i].$$('game-tile');
-        const results = await Promise.all(
-            tiles.map(t => t.getAttribute('evaluation')),
-        );
+        guesses.add(guess);
+        await enterGuess(page, guess);
+        const results = await getResults(page, i);
         
-        if (results.every(r => r === 'correct')) {
-            answer = guess;
-            break;
-        }
+        if (results.every(r => r === 'correct')) break;
 
         results.forEach((result, i) => {
             const l = guess[i];
@@ -61,11 +49,11 @@ const main = async () => {
         });
     }
 
-    await page.click('#share-button');
-    const squares = await page.evaluate(() => navigator.clipboard.readText());
+    const squares = await copySquares(page);
+    const guessList = [...guesses].map(g => g.toUpperCase()).join('\n');
+    console.log(`${guessList}\n\n${squares}`);
+
     await browser.close();
-    
-    console.log(`Answer: "${answer.toUpperCase()}"\n\n${squares}`);
 };
 
 main();
