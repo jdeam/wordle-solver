@@ -1,5 +1,7 @@
 const playwright = require('playwright');
-const { getNextGuess } = require('./utils');
+const { getNextGuess } = require('./wordUtils');
+
+const WORDLE_URL = 'https://www.powerlanguage.co.uk/wordle/';
 
 const main = async () => {
     const browser = await playwright.chromium.launch({ headless: false });
@@ -7,7 +9,7 @@ const main = async () => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 
     const page = await context.newPage();
-    await page.goto('https://www.powerlanguage.co.uk/wordle/');
+    await page.goto(WORDLE_URL);
     await page.click('.close-icon');
 
     const hits = new Set();
@@ -31,17 +33,19 @@ const main = async () => {
 
         const rows = await page.$$('game-row');
         const tiles = await rows[i].$$('game-tile');
-        const results = await Promise.all(tiles.map(tile => tile.getAttribute('evaluation')));
+        const results = await Promise.all(
+            tiles.map(t => t.getAttribute('evaluation')),
+        );
         
         if (results.every(r => r === 'correct')) {
             answer = guess;
             break;
         }
 
-        for (let i = 0; i < 5; i++) { 
+        results.forEach((result, i) => {
             const l = guess[i];
-
-            switch (results[i]) {
+            
+            switch (result) {
                 case 'absent': 
                     if (!hits.has(l)) toExclude.push(l);
                     break;
@@ -54,7 +58,7 @@ const main = async () => {
                     hits.add(l);
                     break;
             }
-        }
+        });
     }
 
     await page.click('#share-button');
