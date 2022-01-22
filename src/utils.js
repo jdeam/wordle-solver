@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const wordList = fs.readFileSync('sgb-words.txt')
+const wordList = fs.readFileSync('assets/sgb-words.txt')
     .toString()
     .split('\n');
 
