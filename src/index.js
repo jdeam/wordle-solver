@@ -9,7 +9,7 @@ const getNextGuess = require('./utils/word');
 const main = async () => {
     const { page, browser } = await startGame();
 
-    const guesses = new Set();
+    const guesses = [];
     const hits = new Set();
 
     const toExclude = {};
@@ -24,7 +24,7 @@ const main = async () => {
             toIncludeAt,
         });
 
-        guesses.add(guess);
+        guesses.push(guess);
         await enterGuess(page, guess);
         const results = await getResults(page, i);
         
@@ -50,7 +50,7 @@ const main = async () => {
     }
 
     const squares = await copySquares(page);
-    const guessList = [...guesses].map(g => g.toUpperCase()).join('\n');
+    const guessList = guesses.map(g => g.toUpperCase()).join('\n');
     console.log(`${squares}\n\n${guessList}`);
 
     await browser.close();
