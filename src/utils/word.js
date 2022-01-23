@@ -1,8 +1,6 @@
 const fs = require('fs');
 
-const wordList = fs.readFileSync('assets/sgb-words.txt')
-    .toString()
-    .split('\n');
+const wordList = fs.readFileSync('assets/sgb-words.txt').toString().split('\n');
 
 const positionToLetterCount = [];
 
@@ -62,15 +60,15 @@ const getNextGuess = ({
         includesAt(toIncludeAt),
     ].filter(Boolean);
 
-    const sortedOptions = wordList
-        .reduce((acc, word) => {
-            const shouldInclude = conditions.every(condition => condition(word));
-            if (shouldInclude) acc.push({word, val: getWordValue(word)});
-            return acc;
-        }, [])
-        .sort((a, b) => b.val - a.val);
+    const { word } = wordList
+        .reduce((max, word) => {
+            const shouldInclude = conditions.every(c => c(word));
+            if (!shouldInclude) return max;
+            const val = getWordValue(word);
+            return max?.val >= val ? max : { word, val };
+        });
     
-    return sortedOptions[0]?.word;
+    return word;
 };
 
 module.exports = { getNextGuess };
