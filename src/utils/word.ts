@@ -1,35 +1,41 @@
-const fs = require('fs');
+import fs from 'fs';
 
-const wordList = fs.readFileSync('assets/sgb-words.txt').toString().split('\n');
+const wordList: string[] = fs.readFileSync('assets/sgb-words.txt')
+    .toString()
+    .split('\n');
 
-const positionToLetterCount = [];
+const positionToLetterCount: { [char: string]: number }[] = [];
 
 wordList.forEach(word => {    
     word.split('').forEach((l, i) => {
         const letterToCount = positionToLetterCount[i] || {};
-        const count = letterToCount[l];
-        if (count) letterToCount[l]++;
-        else letterToCount[l] = 1;
+        const count = letterToCount[l] || 0;
+        letterToCount[l] = count + 1;
         positionToLetterCount[i] = letterToCount;
     });
 });
 
-const getWordValue = (word) => {
+const getWordValue = (word: string): number => {
     return word.split('').reduce((v, l, i) => {
         return v + positionToLetterCount[i][l];
     }, 0); 
 };
 
-const hasAllUniqueLetters = (word) => {
+type Validator = (word: string) => boolean;
+export type ToExclude = { [char: string]: boolean };
+export type ToIncludeNotAt = { [index: string]: string[] };
+export type ToIncludeAt = { [index: string]: string };
+
+const hasAllUniqueLetters: Validator = (word) => {
     return new Set(word.split('')).size === 5;
 };
 
-const excludes = (isExcluded) => {
-    return (word) => word.split('').every(l => !isExcluded[l]);
+const excludes = (isExcluded: ToExclude): Validator => {
+    return (word: string) => word.split('').every(l => !isExcluded[l]);
 };
 
-const includesNotAt = (indexToLetters) => {
-    return (word) => {
+const includesNotAt = (indexToLetters: ToIncludeNotAt): Validator => {
+    return (word: string) => {
         return Object.entries(indexToLetters)
             .every(([i, letters]) => {
                 return letters.every(l => word.includes(l) && word[i] !== l);
@@ -37,19 +43,19 @@ const includesNotAt = (indexToLetters) => {
     };
 };
 
-const includesAt = (indexToLetter) => {
+const includesAt = (indexToLetter: ToIncludeAt): Validator => {
     return (word) => {
         return Object.entries(indexToLetter)
             .every(([i, l]) => word[i] === l);
     };
 };
 
-const getNextGuess = ({
-    unique,
-    toExclude,
-    toIncludeNotAt,
-    toIncludeAt,
-}) => {    
+export const getNextGuess = (
+    unique: boolean,
+    toExclude: ToExclude,
+    toIncludeNotAt: ToIncludeNotAt,
+    toIncludeAt: ToIncludeAt,
+) => {    
     const conditions = [
         unique && hasAllUniqueLetters,
         excludes(toExclude),
@@ -58,14 +64,12 @@ const getNextGuess = ({
     ].filter(Boolean);
 
     const { word } = wordList
-        .reduce((max, word) => {
+        .reduce((max: { word: string, val: number } | null, word) => {
             const shouldInclude = conditions.every(c => c(word));
             if (!shouldInclude) return max;
             const val = getWordValue(word);
             return max?.val >= val ? max : { word, val };
-        });
+        }, null);
     
     return word;
 };
-
-module.exports = getNextGuess;

@@ -2,14 +2,21 @@
   "name": "wordle-solver",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js"
+    "lint": "eslint . --ext .ts",
+    "start": "tsc && node dist/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "playwright": "^1.18.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.10.0",
+    "@typescript-eslint/parser": "^5.10.0",
+    "eslint": "^8.7.0",
+    "typescript": "^4.5.5"
   }
 }

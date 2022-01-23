@@ -1,28 +1,34 @@
-const { 
+import { 
     startGame, 
     enterGuess, 
     getResults,
     copySquares,
-} = require('./utils/page');
-const getNextGuess = require('./utils/word');
+} from './utils/page';
+import { 
+    ToExclude,
+    ToIncludeNotAt,
+    ToIncludeAt,
+    getNextGuess,
+} from './utils/word';
 
 const main = async () => {
     const { page, browser } = await startGame();
 
-    const guesses = [];
-    const hits = new Set();
+    const guesses: string[] = [];
+    const hits = new Set<string>();
 
-    const toExclude = {};
-    const toIncludeNotAt = {};
-    const toIncludeAt = {};
+    const toExclude: ToExclude = {};
+    const toIncludeNotAt: ToIncludeNotAt = {};
+    const toIncludeAt: ToIncludeAt = {};
 
     for (let i = 0; i < 6; i++) {
-        const guess = getNextGuess({
-            unique: !i,
+        const unique = !i;
+        const guess = getNextGuess(
+            unique,
             toExclude,
             toIncludeNotAt,
             toIncludeAt,
-        });
+        );
 
         guesses.push(guess);
         await enterGuess(page, guess);
