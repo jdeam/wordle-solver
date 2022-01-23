@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-const wordList: string[] = fs.readFileSync('assets/sgb-words.txt')
+const wordList: string[] = fs.readFileSync('src/sgb-words.txt')
     .toString()
     .split('\n');
 
