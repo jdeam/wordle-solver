@@ -24,26 +24,23 @@ const hasAllUniqueLetters = (word) => {
     return new Set(word.split('')).size === 5;
 };
 
-const excludes = (letters) => {
+const excludes = (isExcluded) => {
+    return (word) => word.split('').every(l => !isExcluded[l]);
+};
+
+const includesNotAt = (indexToLetters) => {
     return (word) => {
-        return word
-            .split('')
-            .every(letter => !letters.includes(letter));
+        return Object.entries(indexToLetters)
+            .every(([i, letters]) => {
+                return letters.every(l => word.includes(l) && word[i] !== l);
+            });
     };
 };
 
-const includesNotAt = (indicesWithLetters) => {
+const includesAt = (indexToLetter) => {
     return (word) => {
-       return indicesWithLetters.every(([index, letter]) => {
-           return word[index] !== letter && word.includes(letter);
-        });
-    };
-};
-
-const includesAt = (indicesWithLetters) => {
-    return (word) => {
-        return indicesWithLetters
-            .every(([index, letter]) => word[index] === letter);
+        return Object.entries(indexToLetter)
+            .every(([i, l]) => word[i] === l);
     };
 };
 

@@ -12,9 +12,9 @@ const main = async () => {
     const guesses = new Set();
     const hits = new Set();
 
-    const toExclude = []
-    const toIncludeNotAt = [];
-    const toIncludeAt = [];
+    const toExclude = {};
+    const toIncludeNotAt = {};
+    const toIncludeAt = {};
 
     for (let i = 0; i < 6; i++) {
         const guess = getNextGuess({
@@ -34,16 +34,16 @@ const main = async () => {
             const l = guess[i];
             
             switch (result) {
-                case 'absent': 
-                    if (!hits.has(l)) toExclude.push(l);
+                case 'correct':
+                    toIncludeAt[i] = l;
+                    hits.add(l);
                     break;
                 case 'present': 
-                    toIncludeNotAt.push([i, l]);
+                    toIncludeNotAt[i] = [...(toIncludeNotAt[i] || []), l];
                     hits.add(l);
                     break;
-                case 'correct':
-                    toIncludeAt.push([i, l]);
-                    hits.add(l);
+                case 'absent': 
+                    if (!hits.has(l)) toExclude[l] = true;
                     break;
             }
         });
