@@ -1,10 +1,10 @@
-const { getNextGuess } = require('./utils/word');
 const { 
     startGame, 
     enterGuess, 
     getResults,
     copySquares,
 } = require('./utils/page');
+const getNextGuess = require('./utils/word');
 
 const main = async () => {
     const { page, browser } = await startGame();

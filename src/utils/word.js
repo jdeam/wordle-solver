@@ -71,4 +71,4 @@ const getNextGuess = ({
     return word;
 };
 
-module.exports = { getNextGuess };
+module.exports = getNextGuess;
