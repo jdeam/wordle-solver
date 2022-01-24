@@ -9,8 +9,7 @@ const positionToLetterCount: { [char: string]: number }[] = [];
 wordList.forEach(word => {    
     word.split('').forEach((l, i) => {
         const letterToCount = positionToLetterCount[i] || {};
-        const count = letterToCount[l] || 0;
-        letterToCount[l] = count + 1;
+        letterToCount[l] = (letterToCount[l] || 0) + 1;
         positionToLetterCount[i] = letterToCount;
     });
 });
@@ -36,17 +35,15 @@ const excludes = (isExcluded: ToExclude): Validator => {
 
 const includesNotAt = (indexToLetters: ToIncludeNotAt): Validator => {
     return (word: string) => {
-        return Object.entries(indexToLetters)
-            .every(([i, letters]) => {
-                return letters.every(l => word.includes(l) && word[i] !== l);
-            });
+        return Object.entries(indexToLetters).every(([i, letters]) => {
+            return letters.every(l => word.includes(l) && word[i] !== l);
+        });
     };
 };
 
 const includesAt = (indexToLetter: ToIncludeAt): Validator => {
     return (word) => {
-        return Object.entries(indexToLetter)
-            .every(([i, l]) => word[i] === l);
+        return Object.entries(indexToLetter).every(([i, l]) => word[i] === l);
     };
 };
 

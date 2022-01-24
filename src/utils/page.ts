@@ -1,7 +1,4 @@
-import playwright, {
-    Page, 
-    Browser,
-} from 'playwright';
+import playwright, { Page, Browser } from 'playwright';
 
 const WORDLE_URL = 'https://www.powerlanguage.co.uk/wordle/';
 
