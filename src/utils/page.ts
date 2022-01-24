@@ -19,10 +19,12 @@ export const enterGuess = async (page: Page, guess: string) => {
     await page.waitForTimeout(2000);
 };
 
-export const getResults = async (page: Page, i: number): Promise<string[]> => {
+type Result = 'correct' | 'present' | 'absent';
+
+export const getResults = async (page: Page, i: number): Promise<Result[]> => {
     const rows = await page.$$('game-row');
     const tiles = await rows[i].$$('game-tile');
-    return Promise.all(tiles.map(t => t.getAttribute('evaluation')));
+    return Promise.all(tiles.map(t => t.getAttribute('evaluation') as Promise<Result>));
 };
 
 export const copySquares = async (page: Page): Promise<string> => {

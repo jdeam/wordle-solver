@@ -14,9 +14,7 @@ import {
 const main = async () => {
     const { page, browser } = await startGame();
 
-    const guesses: string[] = [];
     const hits = new Set<string>();
-
     const toExclude: ToExclude = {};
     const toIncludeNotAt: ToIncludeNotAt = {};
     const toIncludeAt: ToIncludeAt = {};
@@ -29,7 +27,6 @@ const main = async () => {
             i,
         );
 
-        guesses.push(guess);
         await enterGuess(page, guess);
         const results = await getResults(page, i);
         
@@ -55,8 +52,7 @@ const main = async () => {
     }
 
     const squares = await copySquares(page);
-    const guessList = guesses.map(g => g.toUpperCase()).join('\n');
-    console.log(`${squares}\n\n${guessList}`);
+    console.log(squares);
 
     await browser.close();
 };
