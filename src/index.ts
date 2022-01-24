@@ -22,12 +22,11 @@ const main = async () => {
     const toIncludeAt: ToIncludeAt = {};
 
     for (let i = 0; i < 6; i++) {
-        const unique = !i;
         const guess = getNextGuess(
-            unique,
             toExclude,
             toIncludeNotAt,
             toIncludeAt,
+            i,
         );
 
         guesses.push(guess);

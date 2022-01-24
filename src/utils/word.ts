@@ -48,17 +48,17 @@ const includesAt = (indexToLetter: ToIncludeAt): Validator => {
 };
 
 export const getNextGuess = (
-    unique: boolean,
     toExclude: ToExclude,
     toIncludeNotAt: ToIncludeNotAt,
     toIncludeAt: ToIncludeAt,
+    index: number,
 ) => {    
-    const conditions = [
-        unique && hasAllUniqueLetters,
+    const conditions: Validator[] = [
+        ...(index < 2 ? [hasAllUniqueLetters] : []),
         excludes(toExclude),
         includesNotAt(toIncludeNotAt),
         includesAt(toIncludeAt),
-    ].filter(Boolean);
+    ];
 
     const { word } = wordList
         .reduce((max: { word: string, val: number } | null, word) => {
