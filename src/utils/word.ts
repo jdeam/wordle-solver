@@ -2,7 +2,7 @@ import fs from 'fs';
 
 const wordList: string[] = fs.readFileSync('src/sgb-words.txt')
     .toString()
-    .split('\n');
+    .split(/\r?\n|\r/);
 
 const positionToLetterCount: { [char: string]: number }[] = [];
 
