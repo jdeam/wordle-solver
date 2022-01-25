@@ -25,6 +25,8 @@ export type ToExclude = { [char: string]: boolean };
 export type ToIncludeNotAt = { [index: string]: string[] };
 export type ToIncludeAt = { [index: string]: string };
 
+const isNotPlural: Validator = (word) => word[4] !== 's';
+
 const hasAllUniqueLetters: Validator = (word) => {
     return new Set(word.split('')).size === 5;
 };
@@ -54,7 +56,7 @@ export const getNextGuess = (
     index: number,
 ) => {    
     const conditions: Validator[] = [
-        ...(index < 2 ? [hasAllUniqueLetters] : []),
+        ...(index < 2 ? [hasAllUniqueLetters, isNotPlural] : []),
         excludes(toExclude),
         includesNotAt(toIncludeNotAt),
         includesAt(toIncludeAt),
