@@ -11,7 +11,7 @@ import {
     getNextGuess,
 } from './utils/word';
 
-const main = async () => {
+const getSolution = async () => {
     const { page, browser } = await startGame();
 
     const hits = new Set<string>();
@@ -52,9 +52,8 @@ const main = async () => {
     }
 
     const squares = await copySquares(page);
-    console.log(squares);
-
     await browser.close();
+    return squares;
 };
 
-main();
+getSolution().then(console.log);
