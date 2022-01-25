@@ -13,15 +13,17 @@ export const startGame = async (): Promise<{ page: Page, browser: Browser }> => 
     return { page, browser };
 };
 
-export const enterGuess = async (page: Page, guess: string) => {
+type Result = 'correct' | 'present' | 'absent';
+
+export const enterGuess = async (
+    page: Page, 
+    guess: string, 
+    i: number,
+):  Promise<Result[]> => {
     await page.type('#game', guess);
     await page.keyboard.press('Enter');
     await page.waitForTimeout(2000);
-};
 
-type Result = 'correct' | 'present' | 'absent';
-
-export const getResults = async (page: Page, i: number): Promise<Result[]> => {
     const rows = await page.$$('game-row');
     const tiles = await rows[i].$$('game-tile');
     return Promise.all(tiles.map(t => t.getAttribute('evaluation') as Promise<Result>));

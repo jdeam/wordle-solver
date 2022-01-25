@@ -1,7 +1,6 @@
 import { 
     startGame, 
     enterGuess, 
-    getResults,
     copySquares,
 } from './utils/page';
 import { 
@@ -27,9 +26,7 @@ const getSolution = async () => {
             i,
         );
 
-        await enterGuess(page, guess);
-        const results = await getResults(page, i);
-        
+        const results = await enterGuess(page, guess, i);
         if (results.every(r => r === 'correct')) break;
 
         results.forEach((result, i) => {
