@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "start": "tsc && node dist/index.js",
-    "test": "tsc && node dist/index.test.js"
+    "test": "tsc && node dist/index.test.js",
+    "compile": "./node_modules/typescript/bin/tsc"
   },
   "author": "",
   "license": "ISC",
