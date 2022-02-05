@@ -1,15 +1,21 @@
-import { startGame, enterGuess, copySquares } from './utils/page';
-import { getNextGuess } from './utils/word';
+import fs from 'fs';
+import { getNextGuess, getResults } from './utils/word';
 
-const getSolution = async () => {
-    const { page, browser } = await startGame();
+const wordList: string[] = fs.readFileSync('src/words_long.txt')
+    .toString()
+    .split(/\r?\n|\r/);
+
+const guessCounts = [];
+
+for (const answer of wordList) {
+    let guessCount = 0;
 
     const toInclude = new Set<string>();
     const toExclude = new Set<string>();
     const toIncludeAt = {};
     const toExcludeAt = {};
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 20; i++) {
         const guess = getNextGuess(
             toInclude,
             toExclude,
@@ -17,8 +23,9 @@ const getSolution = async () => {
             toExcludeAt,
             i,
         );
-
-        const results = await enterGuess(page, guess, i);
+        
+        guessCount += 1;
+        const results = getResults(guess, answer);
         if (results.every(r => r === 'correct')) break;
 
         const { correct, present, absent } = results
@@ -44,9 +51,10 @@ const getSolution = async () => {
         });
     }
 
-    const squares = await copySquares(page);
-    await browser.close();
-    return squares;
-};
+    console.log({ answer, guessCount });
+    guessCounts.push(guessCount);
+}
 
-getSolution().then(console.log);
+const sum = guessCounts.reduce((s, c) => s + c);
+const avg = sum / guessCounts.length;
+console.log({ avg });
