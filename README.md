@@ -7,7 +7,7 @@ To install:
 npm i
 ```
 
-To run:
+To solve today's Wordle:
 ```
-npm run start
+npm start
 ```
