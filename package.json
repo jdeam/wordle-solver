@@ -6,8 +6,8 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha --require ts-node/register ./test/**/*.spec.ts",
     "lint": "eslint . --ext .ts",
-    "start": "tsc && node dist/index.js",
-    "score": "tsc && node dist/score.js",
+    "start": "tsc && node dist/src/index.js",
+    "score": "tsc && node dist/src/score.js",
     "compile": "./node_modules/typescript/bin/tsc"
   },
   "author": "",
