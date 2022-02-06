@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getNextGuess, getResults } from './utils/word';
 
-const wordList: string[] = fs.readFileSync('src/words_long.txt')
+const wordList: string[] = fs.readFileSync('data/words_long.txt')
     .toString()
     .split(/\r?\n|\r/);
 
