@@ -1,74 +1,106 @@
 import fs from 'fs';
 
-const wordList: string[] = fs.readFileSync('src/sgb-words.txt')
+const wordList: string[] = fs.readFileSync('src/words_long.txt')
     .toString()
     .split(/\r?\n|\r/);
 
-const positionToLetterCount: { [char: string]: number }[] = [];
+type Result = 'correct' | 'present' | 'absent';
 
-wordList.forEach(word => {    
-    word.split('').forEach((l, i) => {
-        const letterToCount = positionToLetterCount[i] || {};
-        letterToCount[l] = (letterToCount[l] || 0) + 1;
-        positionToLetterCount[i] = letterToCount;
+export const getResults = (
+    guess: string, 
+    answer: string,
+): Result[] => {
+    const copy = answer.split('');
+    const results = Array(5);
+    // Mark correct letters first ...
+    guess.split('').forEach((l, i) => {
+        if (copy[i] === l) {
+            results[i] = 'correct';
+            copy[i] = null;
+        }
     });
-});
+    // Then mark present/absent letters ...
+    guess.split('').forEach((l, i) => {
+        if (results[i]) return;
+        if (copy.includes(l)) {
+            results[i] = 'present';
+            copy[copy.indexOf(l)] = null;
+            return;
+        }
+        results[i] = 'absent';
+    });
 
-const getWordValue = (word: string): number => {
-    return word.split('').reduce((v, l, i) => {
-        return v + positionToLetterCount[i][l];
-    }, 0); 
+    return results;
 };
 
-type Validator = (word: string) => boolean;
-export type ToExclude = { [char: string]: boolean };
-export type ToIncludeNotAt = { [index: string]: string[] };
-export type ToIncludeAt = { [index: string]: string };
+const getWordVal = (word: string): number => {
+    return wordList.reduce((val, answer) => {
+        const results = getResults(word, answer);
+        const score = results.reduce((s, r) => {
+            if (r === 'correct') return s + 2;
+            if (r === 'present') return s + 1;
+            return s;
+        }, 0);
+        return val + score;
+    }, 0);
+};
 
-const isNotPlural: Validator = (word) => word[4] !== 's';
+type WordWithVal = { word: string, val: number };
+
+const wordListWithVals: WordWithVal[] = wordList
+    .map(word=> ({ word, val: getWordVal(word) }));
+
+type Validator = (word: string) => boolean;
 
 const hasAllUniqueLetters: Validator = (word) => {
     return new Set(word.split('')).size === 5;
 };
 
-const excludes = (isExcluded: ToExclude): Validator => {
-    return (word: string) => word.split('').every(l => !isExcluded[l]);
+const includes = (toInclude: Set<string>): Validator => {
+    return (word: string) => [...toInclude].every(l => word.includes(l));
 };
 
-const includesNotAt = (indexToLetters: ToIncludeNotAt): Validator => {
-    return (word: string) => {
-        return Object.entries(indexToLetters).every(([i, letters]) => {
-            return letters.every(l => word.includes(l) && word[i] !== l);
-        });
+const excludes = (toExclude: Set<string>): Validator => {
+    return (word: string) => [...toExclude].every(l => !word.includes(l));
+};
+
+const includesAt = (toIncludeAt: { [index: string]: string }): Validator => {
+    return (word) => {
+        return Object.entries(toIncludeAt)
+            .every(([i, l]) => word[i] === l);
     };
 };
 
-const includesAt = (indexToLetter: ToIncludeAt): Validator => {
-    return (word) => {
-        return Object.entries(indexToLetter).every(([i, l]) => word[i] === l);
+const excludesAt = (toExcludeAt: { [index: string]: string[] }): Validator => {
+    return (word: string) => {
+        return Object.entries(toExcludeAt)
+            .every(([i, letters]) => letters.every(l => word[i] !== l));
     };
 };
 
 export const getNextGuess = (
-    toExclude: ToExclude,
-    toIncludeNotAt: ToIncludeNotAt,
-    toIncludeAt: ToIncludeAt,
-    index: number,
+    toInclude: Set<string>,
+    toExclude: Set<string>,
+    toIncludeAt: { [index: string]: string },
+    toExcludeAt: { [index: string]: string[] },
+    i: number,
 ) => {    
-    const conditions: Validator[] = [
-        ...(index < 2 ? [hasAllUniqueLetters, isNotPlural] : []),
+    const conditions: Validator[] = i < 2 ? [
+        hasAllUniqueLetters,
+        excludes(new Set([...toInclude, ...toExclude])),
+    ] : [
+        includes(toInclude),
         excludes(toExclude),
-        includesNotAt(toIncludeNotAt),
         includesAt(toIncludeAt),
+        excludesAt(toExcludeAt),
     ];
 
-    const { word } = wordList
-        .reduce((max: { word: string, val: number } | null, word) => {
+    const { word } = wordListWithVals
+        .reduce((max: WordWithVal | null, { word, val }) => {
             const shouldInclude = conditions.every(c => c(word));
-            if (!shouldInclude) return max;
-            const val = getWordValue(word);
-            return max?.val >= val ? max : { word, val };
+            if (!shouldInclude || max?.val >= val) return max;
+            return { word, val };
         }, null);
-    
+
     return word;
 };
