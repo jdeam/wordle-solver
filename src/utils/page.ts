@@ -1,6 +1,6 @@
 import playwright, { Page, Browser } from 'playwright';
 
-const WORDLE_URL = 'https://www.powerlanguage.co.uk/wordle/';
+const WORDLE_URL = 'https://www.nytimes.com/games/wordle/index.html';
 
 export const startGame = async (): Promise<{ page: Page, browser: Browser }> => {
     const browser = await playwright.chromium.launch({ headless: false });
@@ -9,7 +9,7 @@ export const startGame = async (): Promise<{ page: Page, browser: Browser }> => 
 
     const page = await context.newPage();
     await page.goto(WORDLE_URL);
-    await page.click('.close-icon');
+    await page.click('[data-testid="icon-close"]');
     return { page, browser };
 };
 
@@ -20,13 +20,13 @@ export const enterGuess = async (
     guess: string, 
     i: number,
 ):  Promise<Result[]> => {
-    await page.type('#game', guess);
+    await page.type('[class^="Board-module_board__"]', guess);
     await page.keyboard.press('Enter');
     await page.waitForTimeout(2000);
 
-    const rows = await page.$$('game-row');
-    const tiles = await rows[i].$$('game-tile');
-    return Promise.all(tiles.map(t => t.getAttribute('evaluation') as Promise<Result>));
+    const rows = await page.$$('[class^="Row-module_row__"]');
+    const tiles = await rows[i].$$('[class^="Tile-module_tile__"]');
+    return Promise.all(tiles.map(t => t.getAttribute('data-state') as Promise<Result>));
 };
 
 export const copySquares = async (page: Page): Promise<string> => {
